@@ -100,10 +100,33 @@ def delete_user(username):
     """Delete a user and redirect to login."""
     if "username" not in session or username != session['username']:
         raise Unauthorized()
-    
+
     user = User.query.get(username)
     db.session.delete(user)
     db.session.commit()
     session.pop('username')
 
     return redirect('/login')
+
+
+@app.route('/users/<username>/feedback/new', methods=['GET', 'POST'])
+def add_feedback(username):
+    """Show a form to add new feedback and handle form submission."""
+
+    if "username" not in session or username != session['username']:
+        raise Unauthorized()
+
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        new_feedback = Feedback(title=title, content=content, username=username)
+        db.session.add(new_feedback)
+        db.session.commit()
+
+        return redirect(f"/users/{feedback.username}")
+
+    else:
+        return render_template('feedback/new.html', form=form)
