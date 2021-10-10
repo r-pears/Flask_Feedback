@@ -14,8 +14,15 @@ class RegisterForm (FlaskForm):
     last_name = StringField('Last Name', validators=[InputRequired(), Length(max=30)])
 
 
-class LoginForm(FlaskForm):
+class LoginForm (FlaskForm):
     """Login Form."""
 
     username = StringField('Username', validators=[InputRequired(), Length(min=1, max=20)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=6, max=60)])
+
+
+class FeedbackForm (FlaskForm):
+    """Form to add feedback."""
+
+    title = StringField('Title', validators=[InputRequired(), Length(max=100)])
+    content = StringField('Content', validators=[InputRequired()])
