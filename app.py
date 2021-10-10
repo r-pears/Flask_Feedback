@@ -93,3 +93,4 @@ def show_user(username):
     user = User.query.get(username)
 
     return render_template('users/show.html', user=user, form=form)
+
