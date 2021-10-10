@@ -1,6 +1,7 @@
 """Feedback-Flask App Routes."""
 from flask import Flask, render_template, session, redirect
 from flask_debugtoolbar import DebugToolbarExtension
+from werkzeug.exceptions import Unauthorized
 
 from models import connect_db, db, User
 from forms import RegisterForm, LoginForm
@@ -70,3 +71,14 @@ def logout():
     """Log out a user."""
     session.pop('username')
     return redirect('/login')
+
+
+@app.route('/users/<username>')
+def show_user(username):
+    """Show page for logged in user."""
+    if "username" not in session or username != session['username']:
+        raise Unauthorized()
+
+    user = User.query.get(username)
+
+    return render_template('users/show.html')
