@@ -2,7 +2,8 @@
 from flask import Flask, render_template, session, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 
-from models import connect_db, db
+from models import connect_db, db, User
+from forms import RegisterForm
 
 app = Flask(__name__)
 
@@ -15,3 +16,30 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
+
+
+@app.route('/')
+def homepage():
+    """Redirects the user to register page."""
+    return redirect('/register')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Register a user, show a form and handle form submission."""
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        email = form.email.data
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+
+        new_user = User.register(username, password, email, first_name, last_name)
+
+        db.session.commit()
+        return redirect('/secret')
+
+    else:
+        return render_template('users/register.html', form=form)
