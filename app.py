@@ -151,3 +151,20 @@ def update_feedback(feedback_id):
         return redirect(f"/users/{feedback.username}")
 
     return render_template('/feedback/edit.html', form=form, feedback=feedback)
+
+
+@app.route('/feedback/<int:feedback_id>/delete', methods=['POST'])
+def delete_feedback(feedback_id):
+    """Delete feedback."""
+    feedback = Feedback.query.get(feedback_id)
+
+    if "username" not in session or feedback.username != session['username']:
+        raise Unauthorized()
+
+    form = DeleteForm()
+
+    if form.validate_on_submit():
+        db.session.delete(feedback)
+        db.session.commit()
+
+    return redirect(f"/users/{feedback.username}")
