@@ -3,7 +3,7 @@ from flask import Flask, render_template, session, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
-from forms import RegisterForm
+from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 
@@ -43,3 +43,23 @@ def register():
 
     else:
         return render_template('users/register.html', form=form)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Show login form and handle form submission."""
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+
+        user = User.authenticate(username, password)
+
+        if user:
+            return redirect('/secret')
+        else:
+            form.username.errors = ['Invalid username/password']
+            return render_template('users/login.html', form=form)
+    
+    return render_template('users/login.html', form=form)
