@@ -4,7 +4,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.exceptions import Unauthorized
 
 from models import connect_db, db, User
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, FeedbackForm, DeleteForm
 
 app = Flask(__name__)
 
@@ -28,6 +28,9 @@ def homepage():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Register a user, show a form and handle form submission."""
+    if "username" in session:
+        return redirect(f"/users/{session['username']}")
+
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -40,7 +43,9 @@ def register():
         new_user = User.register(username, password, email, first_name, last_name)
 
         db.session.commit()
-        return redirect('/secret')
+        session['username'] = user.username
+
+        return redirect(f"/users/{user.username}")
 
     else:
         return render_template('users/register.html', form=form)
@@ -49,6 +54,9 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Show login form and handle form submission."""
+    if "username" in session:
+        return redirect(f"/users/{session['username']}")
+
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -58,7 +66,9 @@ def login():
         user = User.authenticate(username, password)
 
         if user:
-            return redirect('/secret')
+            session['username'] = user.username
+            return redirect(f"/users/{user.username}")
+
         else:
             form.username.errors = ['Invalid username/password']
             return render_template('users/login.html', form=form)
@@ -79,6 +89,7 @@ def show_user(username):
     if "username" not in session or username != session['username']:
         raise Unauthorized()
 
+    form = DeleteForm()
     user = User.query.get(username)
 
-    return render_template('users/show.html')
+    return render_template('users/show.html', user=user, form=form)
